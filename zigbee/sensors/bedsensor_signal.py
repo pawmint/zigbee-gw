@@ -52,6 +52,8 @@ class Bedsensor(object):
         meta_data = {'type' : None,
                      'sensor': 'bedsensor'}
 
+        logger.info("%s: The bedsensor %s sent %s" % (date.isoformat(), bed_ID, DR1))
+
         occupency = bed_reasoning.occupency(DR1)
         if occupency is not self.occupency:
             self.occupency = occupency
@@ -60,6 +62,7 @@ class Bedsensor(object):
                     'value': occupency,
                     'signal_time' : bed_time,
                     'date': date.isoformat()}
+            logger.info("Occupency level: %s" % occupency)
 
         else:
             meta_data['type'] = 'signal'

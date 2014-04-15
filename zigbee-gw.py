@@ -11,7 +11,7 @@ from ubigate import log, logger
 def main():
     gate = Ubigate('resources/conf.ini')
     log.add_logger_file('data.log', logging.DEBUG)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     logger.info("Starting application")
     logger.info('Server: %s\n'
