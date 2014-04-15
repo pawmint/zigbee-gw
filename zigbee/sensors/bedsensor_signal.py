@@ -12,6 +12,7 @@ FRAGMENT_NUMBER = 3
 DEFAULT_NB_FSR = 0
 DEFAULT_NB_FSC = 0
 DEFAULT_OCCUPENCY = 'off'
+DEFAULT_T0 = None
 
 class Bedsensor(object):
     def __init__(self, timezone, mac_id = None):
@@ -20,6 +21,7 @@ class Bedsensor(object):
         self.nb_FSR = DEFAULT_NB_FSR
         self.nb_FSC = DEFAULT_NB_FSC
         self.occupency = DEFAULT_OCCUPENCY
+        self.t0 = DEFAULT_T0
 
 
     def integrity(self, signal):
@@ -46,7 +48,6 @@ class Bedsensor(object):
     def formalize(self, DR1, bed_ID, bed_time, date, format):
         """
         This method formalizes the data in adding meta data for the zigbee-gw program and the server interpretation.
-        TODO: Add a memory to know the previous occupency state of the bedsensor
         """
         meta_data = {'type' : None,
                      'sensor': 'bedsensor'}
@@ -72,13 +73,13 @@ class Bedsensor(object):
     def initialize(self, sample_bits):
         """
         Initialization signal
-        TODO: Add a memory to keep this informations
         """
 
         logger.info('The signal matched with the bedsensor initialization patern')
 
         self.nb_FSR = int(sample_bits[1])
         self.nb_FSC = int(sample_bits[2])
+        self.t0 = self.get_date()
 
         logger.info('The bedsensor is equiped with %s FSR sensors and %s FSC sensors' % (self.nb_FSR, self.nb_FSC))
 
@@ -137,10 +138,13 @@ class Bedsensor(object):
                 for octet in sample_ID:
                     bed_time = (bed_time*256)+ord(octet)
 
+                logger.debug('Time of the Bedproto: %s' % bed_time)
+
                 bed_addr = 0
                 for octet in signal_addr:
                     bed_addr = (bed_addr*256)+ord(octet)
 
+                logger.debug('Address of the Bedproto: %s' % bed_addr)
                 # bed_addr = int(signal_addr, 16)
 
 
