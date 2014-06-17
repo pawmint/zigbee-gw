@@ -1,7 +1,6 @@
 import logging
 
 from zigbee import zigbee_reader
-#from zigbee import zigbeeReader
 
 from ubigate import Ubigate
 from ubigate import log, logger
@@ -28,7 +27,6 @@ def main():
             topic = "/zigbee/sensor/%s" % sensor
             gate.push(topic, data)
 
-#    zigbeeReader.run()
 
 if __name__ == "__main__":
     main()

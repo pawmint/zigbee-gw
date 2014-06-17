@@ -7,26 +7,20 @@ from ubigate import logger
 
 
 def matches(signal, timezone):
-    """@todo: Docstring for matches.
-    :signal: @todo
-    :returns: @todo
+    """
+    The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
     """
     #Data FSR 1spl   $ DR1 , TIME , R0 R1 R2 R3 R4 R5 R6 R7 \n
-    #example: $DR1,012345678,0123401234012340123401234012340123401234\n
-    #with the number writed in binair in big indian (16 or 32 bit)
-     #Data FSC 1spl   $ DC1 , TIME , C1 C2 \n
-    #Data FSC Nspl   $ DCN , TIME , DELTA , C0 C1 , ... \n
-    #Every simple is concatenated in a buffer without separation
-    #example: $DR1,012345A78,0123401234012340123401234012340123401234\n$DC1...\n
+    #example: $DR1,\x00\xe6\x90\x1c,\x00\x00\x03V\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n
+
     #The other simple possible is $YOP,nb_FSR,nbFSC\n
+    #example: $YOP,08,02\n
 
     logger.debug('Checking the signal "%s" in bedsensor program' % str(signal))
 
 
     pattern = (r'^\$(?P<data_type>YOP|DR1).*$\n')
-
     regexp = re.compile(pattern)
-
     match = regexp.match(str(signal))
 
     if match:
@@ -34,6 +28,10 @@ def matches(signal, timezone):
         sample_bits = signal.split(",")
 
         if match.group('data_type') == 'YOP':
+
+            """
+            Initialization signal
+            """
 
             logger.info('The signal matched with the bedsensor initialization patern')
 
@@ -44,6 +42,10 @@ def matches(signal, timezone):
             return None, None
 
         else:
+
+            """
+            FSR data signal
+            """
 
             logger.info('The signal matched with the bedsensor DR1 data patern')
             logger.debug('The DR1 sample is: %s' %sample_bits)
@@ -69,9 +71,9 @@ def matches(signal, timezone):
                                datetime.now().microsecond))
 
             sample_time = sample_bits[1]
-            time = 0
+            Arduino_time = 0
             for octet in sample_time:
-                time = ( time * 256 ) + ord( octet )
+                Arduino_time = ( Arduino_time * 256 ) + ord( octet )
 
             sample_data = sample_bits[2]
             DR1 = {}
@@ -83,7 +85,7 @@ def matches(signal, timezone):
                     DR1[val] = ( DR1[val] * 256 ) + ord( octet )
                 i = i+2
 
-            logger.debug('Arduino time: %s, Measures of the FSR: %s, date: %s' % (time, DR1, date.isoformat()))
+            logger.debug('Arduino time: %s, Measures of the FSR: %s, date: %s' % (Arduino_time, DR1, date.isoformat()))
 
             data = {'DR1': DR1,
                     'date': date.isoformat()}
