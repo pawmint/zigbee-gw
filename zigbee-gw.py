@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
 import logging
 
 from zigbee import zigbee_reader
+#from zigbee import zigbeeReader
 
 from ubigate import Ubigate
 from ubigate import log, logger
@@ -24,10 +23,12 @@ def main():
                                   gate.config.username,
                                   gate.timezone))
 
-
     for sensor, data in zigbee_reader.run(gate.timezone):
-        topic = "/zigbee/sensor/%s" % sensor
-        gate.push(topic, data)
+        if data is not None:
+            topic = "/zigbee/sensor/%s" % sensor
+            gate.push(topic, data)
+
+#    zigbeeReader.run()
 
 if __name__ == "__main__":
     main()

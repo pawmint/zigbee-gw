@@ -13,7 +13,7 @@ def matches(signal, timezone):
 
     """
     # sample matching input: 448 - OFF\r\n
-    logger.debug('Checking motion for signal "%s"' % str(signal))
+    logger.debug('Checking motion for signal "%s" in pirled program' % str(signal))
 
     pattern = (r'^(?P<value>\d{3})\s-\s(?P<led>ON|OFF)\r\n$\n*')
 
