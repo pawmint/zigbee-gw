@@ -25,17 +25,16 @@ Adapt the config file:
 * Gateway and house correspond of the BeagleBone name and the house ID.
 
 ##How to run the program
-(If the BeagleBone is up to date)
+*(If the BeagleBone is up to date)*
 
-Run the proper virtual environment
-```
-In the root of the BeagleBone write the line
-~# source <NameOfTheEnvironment>/bin/activate
-```
+* Run the virtual environment
 
-Run the MQTT broker.
+  ```
+  ~# source <NameOfTheEnvironment>/bin/activate
+  ```
+* Run the MQTT broker.
+* In the folder zigbee-gw run the software with the command:
 
-In the folder zigbee-gw run the software with the command:
-```
-~# python zigbee-gw.py
-```
+  ```
+  ~# python zigbee-gw.py
+  ```
