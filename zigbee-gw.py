@@ -25,6 +25,7 @@ def main():
     for sensor, data in zigbee_reader.run(gate.timezone):
         if data is not None:
             topic = "/zigbee/sensor/%s" % sensor
+            data['house'] = gate.config.house
             gate.push(topic, data)
 
 
