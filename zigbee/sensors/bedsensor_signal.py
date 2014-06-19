@@ -47,16 +47,16 @@ def matches(signal, timezone):
             FSR data signal
             """
 
-            logger.info('The signal matched with the bedsensor DR1 data patern')
+            logger.info('The signal matchs with the bedsensor DR1 data patern')
             logger.debug('The DR1 sample is: %s' %sample_bits)
 
             """
-            It is necessary to put a try because after some time of use, the Arduino bug and send incomplete sample.
+            It is necessary to put a condition because the Arduino can bug and send incomplete sample.
             """
-            try:
-                len(sample_bits) == 3
-            except:
-                logger.debug('There are more than 3 parts in the sample')
+
+            if len(sample_bits) <= 3:
+                logger.debug('There are %s parts in the sample' % len(sample_bits))
+                logger.debug('There are more than 4 parts in the sample')
                 return None, None
 
             sensor = 'bedsensor'
@@ -70,24 +70,37 @@ def matches(signal, timezone):
                                datetime.now().second,
                                datetime.now().microsecond))
 
-            sample_time = sample_bits[1]
+            sample_ID = sample_bits[1]
+            bed_mac = 0
+            for octet in sample_ID:
+                bed_mac = (bed_mac*256)+ord(octet)
+
+            bed_ID = 'BED-'+str(bed_mac)
+
+            sample_time = sample_bits[2]
             Arduino_time = 0
             for octet in sample_time:
-                Arduino_time = ( Arduino_time * 256 ) + ord( octet )
+                Arduino_time = (Arduino_time*256)+ord(octet)
 
-            sample_data = sample_bits[2]
+            sample_data = sample_bits[3]
             DR1 = {}
             i = 0
             for val in ['R1','R2','R3','R4','R5','R6','R7','R8']:
-                utf8 = sample_data[i]+sample_data[i+1]
+                try:
+                    utf8 = sample_data[i]+sample_data[i+1]
+                except:
+                    logger.debug('There are less than 8 values received')
+                    return None, None
                 DR1[val] = 0
                 for octet in utf8:
-                    DR1[val] = ( DR1[val] * 256 ) + ord( octet )
+                    DR1[val] = (DR1[val]*256 )+ord(octet)
                 i = i+2
 
             logger.debug('Arduino time: %s, Measures of the FSR: %s, date: %s' % (Arduino_time, DR1, date.isoformat()))
 
-            data = {'DR1': DR1,
+            data = {'sensor' : bed_ID,
+                    'format': match.group('data_type'),
+                    'sample': DR1,
                     'date': date.isoformat()}
 
             return sensor, data
@@ -95,4 +108,4 @@ def matches(signal, timezone):
     else:
         logger.debug('The signal is not matching with the bedsensor patern')
 
-    return None, None
+        return None, None
