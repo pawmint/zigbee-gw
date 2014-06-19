@@ -6,8 +6,10 @@ This is the intern zigbee gateway program for ubigate. It each sensors present i
 This program have to be set up on the beaglebone when sensors using zigbee are installed in a home.
 
 ##How To configure the BeagleBone:
-Create a git repository for ubigate in /home switch to the branch API
-Create the git repository for zigbe-gw in /home. switch to the branch dev
+Create a git repository for ubigate in /home and switch to the branch API.
+
+Create the git repository for zigbe-gw in /home and switch to the branch dev.
+
 Create a virtual environment and install the following libraries:
 ```
 argparse==1.2.1
@@ -36,8 +38,9 @@ Run the proper virtual environment
 In the root of the BeagleBone write the line
 ~#source <NameOfTheEnvironment>/bin/activate
 ```
-Run the MQTT broker
-Run the program
+Run the MQTT broker.
+
+Run the program.
 ```
 In the folder /home/zigbee-gw/ run the software with the command
 ~#python zigbee-gw.py
