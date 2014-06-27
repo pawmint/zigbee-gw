@@ -10,8 +10,8 @@ def matches(signal, timezone):
     """
     The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
     """
-    #Data FSR 1spl   $ DR1 , TIME , R0 R1 R2 R3 R4 R5 R6 R7 \n
-    #example: $DR1,\x00\xe6\x90\x1c,\x00\x00\x03V\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n
+    #Data FSR 1spl   $ DR1 , ID , R0 R1 R2 R3 R4 R5 R6 R7 \n
+    #example: $DR1,\x00\x13\xa2\x00@\xa1N\xba,\x00\x00\x06\x84\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n
 
     #The other simple possible is $YOP,nb_FSR,nbFSC\n
     #example: $YOP,08,02\n
@@ -54,9 +54,9 @@ def matches(signal, timezone):
             It is necessary to put a condition because the Arduino can bug and send incomplete sample.
             """
 
-            if len(sample_bits) <= 3:
+            if len(sample_bits) < 3:
                 logger.debug('There are %s parts in the sample' % len(sample_bits))
-                logger.debug('There are more than 4 parts in the sample')
+                logger.debug('There are more less 3 than parts in the sample')
                 return None, None
 
             sensor = 'bedsensor'
@@ -77,12 +77,7 @@ def matches(signal, timezone):
 
             bed_ID = 'BED-'+str(bed_mac)
 
-            sample_time = sample_bits[2]
-            Arduino_time = 0
-            for octet in sample_time:
-                Arduino_time = (Arduino_time*256)+ord(octet)
-
-            sample_data = sample_bits[3]
+            sample_data = sample_bits[2]
             DR1 = {}
             i = 0
             for val in ['R1','R2','R3','R4','R5','R6','R7','R8']:
@@ -96,7 +91,7 @@ def matches(signal, timezone):
                     DR1[val] = (DR1[val]*256 )+ord(octet)
                 i = i+2
 
-            logger.debug('Arduino time: %s, Measures of the FSR: %s, date: %s' % (Arduino_time, DR1, date.isoformat()))
+            logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
             data = {'sensor' : bed_ID,
                     'format': match.group('data_type'),
