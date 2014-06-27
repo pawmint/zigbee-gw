@@ -1,4 +1,3 @@
-import time
 import serial
 
 from ubigate import logger
@@ -7,7 +6,6 @@ from zigbee.sensors import bedsensor_signal
 serialport = serial.Serial("/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0", 9600, timeout=0.1)
 
 def read_zigbee():
-    time.sleep(0.1)
     try:
         line = serialport.readlines(None)
         return line
@@ -15,7 +13,7 @@ def read_zigbee():
         return None
 
 def gather_data(signal, timezone):
-  
+
     data = None
     sensor = None
 
