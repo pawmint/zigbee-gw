@@ -18,7 +18,8 @@ setup(
     include_package_data=True,
     install_requires=[
         'ubigate>=0.0.2',
-        'pyserial>=2.7'
+        'pyserial>=2.7',
+        'Xbee>=2.0.0'
     ],
     dependency_links=[
         "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@0.0.2#egg=ubiGATE-0.0.2"
