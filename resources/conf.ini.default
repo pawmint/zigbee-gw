@@ -1,6 +1,7 @@
 [Ubigate]
 server = localhost
 port = 8000
+password = buzleclair
 gateway = localdev
 house = 2
 username = clement
