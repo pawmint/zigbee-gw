@@ -16,12 +16,12 @@ def matches(signal, timezone):
     #The other simple possible is $YOP,nb_FSR,nbFSC\n
     #example: $YOP,08,02\n
 
-    logger.debug('Checking the signal "%s" in bedsensor program' % str(signal))
+    logger.debug('Checking the signal "%s" in bedsensor program' % signal)
 
 
     pattern = (r'^\$(?P<data_type>YOP|DR1).*$\n')
     regexp = re.compile(pattern)
-    match = regexp.match(str(signal))
+    match = regexp.match(signal)
 
     if match:
 
