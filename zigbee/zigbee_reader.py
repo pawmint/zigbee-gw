@@ -17,8 +17,6 @@ ser_init = serial.Serial(PORT, BAUD_RATE, timeout=0.1)
 
 # Create API object
 xbee = XBee(ser,escaped=True)
-import pprint
-pprint.pprint(xbee.api_responses)
 
 def initialize_APImode():
 
