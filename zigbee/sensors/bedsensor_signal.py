@@ -1,10 +1,18 @@
 from datetime import datetime
 import pytz
 import re
+import sys
 
 from ubigate import logger
 
+SIZEOF_DR1 = 48
 
+def integrity(signal):
+    if sys.getsizeof(signal) == SIZEOF_DR1:
+        logger.debug('The size of the data received is corresponding')
+        return True
+    logger.error('The size of the data received is not corresponding')
+    return False
 
 def matches(signal, timezone):
     """
@@ -15,6 +23,8 @@ def matches(signal, timezone):
 
     #The other simple possible is $YOP,nb_FSR,nbFSC\n
     #example: $YOP,08,02\n
+
+    #$DR1,\x00\x10\x02\r,\n\x90\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\n
 
     logger.debug('Checking the signal "%s" in bedsensor program' % signal)
 
@@ -46,6 +56,9 @@ def matches(signal, timezone):
             """
             FSR data signal
             """
+
+#            if integrity(signal) == False:
+#                return None, None
 
             logger.info('The signal matchs with the bedsensor DR1 data patern')
             logger.debug('The DR1 sample is: %s' %sample_bits)
