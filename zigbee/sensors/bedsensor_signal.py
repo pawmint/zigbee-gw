@@ -3,6 +3,7 @@ import pytz
 import re
 import sys
 
+from zigbee.sensors import bed_reasoning
 from ubigate import logger
 
 SIZEOF_DR1 = 48
@@ -72,8 +73,6 @@ def matches(signal, timezone):
                 logger.debug('There are more less 3 than parts in the sample')
                 return None, None
 
-            sensor = 'bedsensor'
-
             tz = pytz.timezone(str(timezone))
             date = tz.localize(datetime(datetime.now().year,
                                datetime.now().month,
@@ -106,12 +105,24 @@ def matches(signal, timezone):
 
             logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-            data = {'sensor' : bed_ID,
-                    'format': match.group('data_type'),
-                    'sample': DR1,
-                    'date': date.isoformat()}
+            meta_data = {'type' : None,
+                         'sensor': 'bedsensor'}
 
-            return sensor, data
+            occupency = bed_reasoning.occupency(DR1)
+            if occupency is not None:
+                meta_data['type'] = 'event'
+                data = {'sensor' : bed_ID,
+                        'value': occupency,
+                        'date': date.isoformat()}
+
+            else:
+                meta_data['type'] = 'signal'
+                data = {'sensor' : bed_ID,
+                        'format': match.group('data_type'),
+                        'sample': DR1,
+                        'date': date.isoformat()}
+
+            return meta_data, data
 
     else:
         logger.debug('The signal is not matching with the bedsensor patern')

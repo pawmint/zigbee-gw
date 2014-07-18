@@ -56,11 +56,11 @@ def read_zigbee():
 def gather_data(signal, timezone):
 
     data = None
-    sensor = None
+    meta_data = None
 
-    sensor, data = bedsensor_signal.matches(signal, timezone)
+    meta_data, data = bedsensor_signal.matches(signal, timezone)
 
-    return sensor, data
+    return meta_data, data
 
 
 def run(timezone):
@@ -81,9 +81,10 @@ def run(timezone):
         signal_data = signal['rf_data']
         logger.debug('Data received: %s' % signal_data)
         try:
-            sensor, data = gather_data(signal_data, timezone)
+            meta_data, data = gather_data(signal_data, timezone)
             logger.debug('data received: %s' % data)
-            yield sensor, data
+            if data is not None:
+                yield meta_data, data
         except TypeError:
             pass
 

@@ -26,11 +26,11 @@ def main():
                                   gate.config.username,
                                   gate.timezone))
 
-    for sensor, data in zigbee_reader.run(gate.timezone):
-        if sensor == 'init' and data == 'error':
+    for meta_data, data in zigbee_reader.run(gate.timezone):
+        if meta_data['sensor'] == 'init' and data == 'error':
             break
         elif data is not None:
-            topic = "/zigbee/sensor/%s" % sensor
+            topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'], meta_data['type'])
             data['house'] = gate.config.house
             gate.push(topic, data)
 
