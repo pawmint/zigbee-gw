@@ -7,6 +7,7 @@ from zigbee.sensors import bed_reasoning
 from ubigate import logger
 
 SIZEOF_DR1 = 48
+FRAGMENT_NUMBER = 3
 
 def integrity(signal):
     if sys.getsizeof(signal) == SIZEOF_DR1:
@@ -14,6 +15,43 @@ def integrity(signal):
         return True
     logger.error('The size of the data received is not corresponding')
     return False
+
+def get_date(timezone):
+    """
+    This method return the date of the computer regarding of the timezone.
+    """
+    tz = pytz.timezone(str(timezone))
+    date = tz.localize(datetime(datetime.now().year,
+                       datetime.now().month,
+                       datetime.now().day,
+                       datetime.now().hour,
+                       datetime.now().minute,
+                       datetime.now().second,
+                       datetime.now().microsecond))
+    return date
+
+def formalize(DR1, bed_ID, date, format):
+    """
+    This method formalizes the data in adding meta data for the zigbee-gw program and the server interpretation.
+    TODO: Add a memory to know the previous occupency state of the bedsensor
+    """
+    meta_data = {'type' : None,
+                 'sensor': 'bedsensor'}
+
+    occupency = bed_reasoning.occupency(DR1)
+    if occupency is not None:
+        meta_data['type'] = 'event'
+        data = {'sensor' : bed_ID,
+                'value': occupency,
+                'date': date.isoformat()}
+
+    else:
+        meta_data['type'] = 'signal'
+        data = {'sensor' : bed_ID,
+                'format': format,
+                'sample': DR1,
+                'date': date.isoformat()}
+    return meta_data, data
 
 def matches(signal, timezone):
     """
@@ -36,12 +74,15 @@ def matches(signal, timezone):
 
     if match:
 
+        date = get_date(timezone)
+
         sample_bits = signal.split(",")
 
         if match.group('data_type') == 'YOP':
 
             """
             Initialization signal
+            TODO: Add a memory to keep this informations
             """
 
             logger.info('The signal matched with the bedsensor initialization patern')
@@ -64,23 +105,9 @@ def matches(signal, timezone):
             logger.info('The signal matchs with the bedsensor DR1 data patern')
             logger.debug('The DR1 sample is: %s' %sample_bits)
 
-            """
-            It is necessary to put a condition because the Arduino can bug and send incomplete sample.
-            """
-
-            if len(sample_bits) < 3:
-                logger.debug('There are %s parts in the sample' % len(sample_bits))
-                logger.debug('There are more less 3 than parts in the sample')
+            if len(sample_bits) < FRAGMENT_NUMBER: # It is necessary to put a condition because the Arduino sending binary values can send unexpected '/n'.
+                logger.error('There are %s fragments, this is less than the %s fragments expected in a sample' % (len(sample_bits), FRAGMENT_NUMBER))
                 return None, None
-
-            tz = pytz.timezone(str(timezone))
-            date = tz.localize(datetime(datetime.now().year,
-                               datetime.now().month,
-                               datetime.now().day,
-                               datetime.now().hour,
-                               datetime.now().minute,
-                               datetime.now().second,
-                               datetime.now().microsecond))
 
             sample_ID = sample_bits[1]
             bed_mac = 0
@@ -96,7 +123,7 @@ def matches(signal, timezone):
                 try:
                     utf8 = sample_data[i]+sample_data[i+1]
                 except:
-                    logger.debug('There are less than 8 values received')
+                    logger.error('There are less than 8 values received')
                     return None, None
                 DR1[val] = 0
                 for octet in utf8:
@@ -105,24 +132,8 @@ def matches(signal, timezone):
 
             logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-            meta_data = {'type' : None,
-                         'sensor': 'bedsensor'}
 
-            occupency = bed_reasoning.occupency(DR1)
-            if occupency is not None:
-                meta_data['type'] = 'event'
-                data = {'sensor' : bed_ID,
-                        'value': occupency,
-                        'date': date.isoformat()}
-
-            else:
-                meta_data['type'] = 'signal'
-                data = {'sensor' : bed_ID,
-                        'format': match.group('data_type'),
-                        'sample': DR1,
-                        'date': date.isoformat()}
-
-            return meta_data, data
+            return formalize(DR1, bed_ID, date, match.group('data_type'))
 
     else:
         logger.debug('The signal is not matching with the bedsensor patern')
