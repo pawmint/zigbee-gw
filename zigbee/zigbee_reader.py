@@ -2,7 +2,7 @@ from xbee import XBee
 import serial
 
 from ubigate import logger
-from zigbee.sensors import bedsensor_signal
+from zigbee.sensors.bedsensor_signal import Bedsensor
 
 PORT = '/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0'
 BAUD_RATE = 9600
@@ -53,17 +53,19 @@ def read_zigbee():
     except TypeError:
         return None
 
-def gather_data(signal, timezone):
+def gather_data(signal, bed_signal):
 
     data = None
     meta_data = None
 
-    meta_data, data = bedsensor_signal.matches(signal, timezone)
+    meta_data, data = bed_signal.matches(signal)
 
     return meta_data, data
 
 
 def run(timezone):
+
+    bed_signal = Bedsensor(timezone)
 
     i = 0
     while i < NB_TRY:
@@ -74,14 +76,15 @@ def run(timezone):
 
     if i == NB_TRY:
         logger.error('The program fail to convert the Xbee module in API mode, try to restart')
-        yield 'init', 'error'
+        meta_data = {'type': 'error'}
+        yield meta_data, None
 
     while True:
         signal = read_zigbee()
         signal_data = signal['rf_data']
         logger.debug('Data received: %s' % signal_data)
         try:
-            meta_data, data = gather_data(signal_data, timezone)
+            meta_data, data = gather_data(signal_data, bed_signal)
             logger.debug('data received: %s' % data)
             if data is not None:
                 yield meta_data, data
