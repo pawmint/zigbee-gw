@@ -3,6 +3,7 @@ import serial
 
 from ubigate import logger
 from zigbee.sensors.bedsensor_signal import Bedsensor
+import time
 
 PORT = '/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0'
 BAUD_RATE = 9600
@@ -27,14 +28,17 @@ def initialize_APImode():
     response = None
 
     ser_init.write("+++")
+    time.sleep(2)
 
     while iteration < NB_ITERATION:
         iteration = iteration + 1
         response = ser_init.readlines(None)
+        logger.info("response 1: %s" %response)
         if response == AT_OK:
             ser_init.write("ATAP 02\r")
             response = ser_init.readlines(None)
-            if response == API_OK:
+            logger.info("response 2: %s" %response)
+            if response == AT_OK:
                 logger.info('The Xbee shield is passing into API mode, level 2')
                 return True
             else:
@@ -81,10 +85,9 @@ def run(timezone):
 
     while True:
         signal = read_zigbee()
-        signal_data = signal['rf_data']
-        logger.debug('Data received: %s' % signal_data)
+        logger.debug('Data received: %s' % signal)
         try:
-            meta_data, data = gather_data(signal_data, bed_signal)
+            meta_data, data = gather_data(signal, bed_signal)
             logger.debug('data received: %s' % data)
             if data is not None:
                 yield meta_data, data

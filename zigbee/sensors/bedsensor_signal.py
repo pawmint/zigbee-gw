@@ -43,7 +43,7 @@ class Bedsensor(object):
                            datetime.now().microsecond))
         return date
 
-    def formalize(self, DR1, bed_ID, date, format):
+    def formalize(self, DR1, bed_ID, bed_time, date, format):
         """
         This method formalizes the data in adding meta data for the zigbee-gw program and the server interpretation.
         TODO: Add a memory to know the previous occupency state of the bedsensor
@@ -57,6 +57,7 @@ class Bedsensor(object):
             meta_data['type'] = 'event'
             data = {'sensor' : bed_ID,
                     'value': occupency,
+                    'signal_time' : bed_time,
                     'date': date.isoformat()}
 
         else:
@@ -64,6 +65,7 @@ class Bedsensor(object):
             data = {'sensor' : bed_ID,
                     'format': format,
                     'sample': DR1,
+                    'signal_time' : bed_time,
                     'date': date.isoformat()}
         return meta_data, data
 
@@ -82,6 +84,9 @@ class Bedsensor(object):
 
 
     def matches(self, signal):
+
+        signal_data = signal['rf_data']
+        signal_addr = signal['source_addr']
         """
         The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
         """
@@ -93,17 +98,17 @@ class Bedsensor(object):
 
         #$DR1,\x00\x10\x02\r,\n\x90\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\n
 
-        logger.debug('Checking the signal "%s" in bedsensor program' % signal)
+        logger.debug('Checking the signal "%s" in bedsensor program' % signal_data)
 
 
         pattern = (r'^\$(?P<data_type>YOP|DR1).*$\n')
         regexp = re.compile(pattern)
-        match = regexp.match(signal)
+        match = regexp.match(signal_data)
 
         if match:
             date = self.get_date()
 
-            sample_bits = signal.split(",")
+            sample_bits = signal_data.split(",")
 
             if match.group('data_type') == 'YOP':
 
@@ -126,12 +131,20 @@ class Bedsensor(object):
                     logger.error('There are %s fragments, this is less than the %s fragments expected in a sample' % (len(sample_bits), FRAGMENT_NUMBER))
                     return None, None
 
-                sample_ID = sample_bits[1]
-                bed_mac = 0
-                for octet in sample_ID:
-                    bed_mac = (bed_mac*256)+ord(octet)
 
-                bed_ID = 'BED-'+str(bed_mac)
+                sample_ID = sample_bits[1]
+                bed_time = 0
+                for octet in sample_ID:
+                    bed_time = (bed_time*256)+ord(octet)
+
+                bed_addr = 0
+                for octet in signal_addr:
+                    bed_addr = (bed_addr*256)+ord(octet)
+
+                # bed_addr = int(signal_addr, 16)
+
+
+                bed_ID = 'BED-'+str(bed_addr)
 
                 sample_data = sample_bits[2]
                 DR1 = {}
@@ -150,7 +163,7 @@ class Bedsensor(object):
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
 
-                return self.formalize(DR1, bed_ID, date, match.group('data_type'))
+                return self.formalize(DR1, bed_ID, bed_time, date, match.group('data_type'))
 
         else:
             logger.debug('The signal is not matching with the bedsensor patern')
