@@ -14,6 +14,7 @@ DEFAULT_NB_FSC = 0
 DEFAULT_OCCUPENCY = 'off'
 DEFAULT_T0 = None
 
+
 class Bedsensor(object):
     def __init__(self, timezone, mac_id = None):
         self.timezone = timezone

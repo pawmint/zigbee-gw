@@ -1,6 +1,10 @@
+import configparser
 
+config = configparser.ConfigParser()
+config.read('zigbee/sensors/bedconf.txt')
+THRESHOLD = int(config['BEDSENSOR']['THRESHOLD'])
 
-THRESHOLD = 500
+#THRESHOLD = 500
 
 def occupency(DR1):
     """
