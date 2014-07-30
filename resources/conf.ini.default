@@ -1,7 +1,7 @@
 [Ubigate]
 server = localhost
 port = 8000
-gateway = <pokemon's name>
+gateway = <gateway>_zigbee
 password = pikachu
 house = 2
-username = <gateway>_zigbee
+username = <pokemon's name>
