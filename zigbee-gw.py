@@ -11,19 +11,19 @@ from ubigate import log, logger
 def main():
     gate = Ubigate('resources/conf.ini')
     log.add_logger_file('data.log', logging.DEBUG)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     logger.info("Starting application")
     logger.info('Server: %s\n'
                 'Port: %s\n'
                 'Password: %s\n'
                 'House: %s\n'
-                'Username: %s\n'
+                'Gateway: %s\n'
                 'Timezone: %s' % (gate.config.server,
                                   gate.config.port,
                                   gate.config.password,
                                   gate.config.house,
-                                  gate.config.username,
+                                  gate.config.gateway,
                                   gate.timezone))
 
     for meta_data, data in zigbee_reader.run(gate.timezone):
