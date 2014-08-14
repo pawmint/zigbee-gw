@@ -4,3 +4,6 @@ port = 8000
 gateway = <pokemon's name>_zigbee
 password = pikachu
 house = 1
+
+[Sensors]
+zigbee.sensors.bedsensor_signal = Bedsensor

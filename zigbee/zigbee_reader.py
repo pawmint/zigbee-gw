@@ -1,9 +1,13 @@
 from xbee import XBee
 import serial
+import time
+import importlib
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 from ubigate import logger
-from zigbee.sensors.bedsensor_signal import Bedsensor
-import time
 
 PORT = '/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0'
 BAUD_RATE = 9600
@@ -56,19 +60,49 @@ def read_zigbee():
     except TypeError:
         return None
 
-def gather_data(signal, bed_signal):
+def gather_data(signal, sensors_list):
 
     data = None
     meta_data = None
 
-    meta_data, data = bed_signal.matches(signal)
+#    meta_data, data = bed_signal.matches(signal)
+    for sensor in sensors_list:
+        meta_data, data = sensor.matches(signal)
+        if data is not None:
+            break
 
     return meta_data, data
 
+def import_sensors(timezone):
+    """
+    Method to manage:
+    The modules importation of the sensors described in the file 'ressource/conf.ini'.
+    The instantiation of the corresponded classes.
+    It return a list of the sensors classes instanciated.
+    """
+
+    config_sensor = configparser.SafeConfigParser()
+    config_sensor.read('resources/conf.ini')
+    sensors_info = dict(config_sensor.items("Sensors"))
+    sensors_path = list(sensors_info.keys())
+    logger.debug("the list of the paths of the sensors: %s" %sensors_path)
+    sensors_name = list(sensors_info.values())
+    logger.debug("the list of the sensors: %s" %sensors_name)
+
+    sensors_classes = []
+    for path, sensor in zip(sensors_path,sensors_name):
+        #Import the modules
+        module = importlib.import_module(path)
+        #Create class objects
+        sensor_object = getattr(module, sensor)
+        #Instanciate the class objects
+        sensors_classes.append(sensor_object(timezone))
+
+    return sensors_classes
 
 def run(timezone):
 
-    bed_signal = Bedsensor(timezone)
+    sensors_list = import_sensors(timezone)
 
     i = 0
     while i < NB_TRY:
@@ -86,7 +120,7 @@ def run(timezone):
         signal = read_zigbee()
         logger.info('Data received: %s' % signal)
         try:
-            meta_data, data = gather_data(signal, bed_signal)
+            meta_data, data = gather_data(signal, sensors_list)
             logger.debug('data received: %s' % data)
             if data is not None:
                 yield meta_data, data
