@@ -52,7 +52,6 @@ def initialize_APImode():
 def read_zigbee():
     try:
         response = xbee.wait_read_frame()
-        logger.debug('Signal read %s' % response)
         return response
     except TypeError:
         return None
@@ -85,7 +84,7 @@ def run(timezone):
 
     while True:
         signal = read_zigbee()
-        logger.debug('Data received: %s' % signal)
+        logger.info('Data received: %s' % signal)
         try:
             meta_data, data = gather_data(signal, bed_signal)
             logger.debug('data received: %s' % data)
