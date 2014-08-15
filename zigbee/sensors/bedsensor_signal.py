@@ -9,20 +9,14 @@ from ubigate import logger
 SIZEOF_DR1 = 48
 FRAGMENT_NUMBER = 3
 
-DEFAULT_NB_FSR = 0
-DEFAULT_NB_FSC = 0
+DEFAULT_ID = None
 DEFAULT_OCCUPENCY = 'off'
-DEFAULT_T0 = None
-
 
 class Bedsensor(object):
-    def __init__(self, timezone, mac_id = None):
+    def __init__(self, timezone):
         self.timezone = timezone
-        self.mac_id = mac_id
-        self.nb_FSR = DEFAULT_NB_FSR
-        self.nb_FSC = DEFAULT_NB_FSC
-        self.occupency = DEFAULT_OCCUPENCY
-        self.t0 = DEFAULT_T0
+        self.mac_id = DEFAULT_ID
+        self.memory = {}
 
 
     def integrity(self, signal):
@@ -31,6 +25,23 @@ class Bedsensor(object):
             return True
         logger.error('The size of the data received is not corresponding')
         return False
+
+    def new_sensor(self, bed_ID):
+
+        new = None
+        id_list = list(self.memory.keys())
+        logger.debug('list of the bed sensor registered: %s' %id_list)
+
+        if id_list.count(bed_ID) == 0:
+            # This is a new bedsensor
+            logger.debug('This is a new bedsensor: %s' %bed_ID)
+            new = True
+        else:
+            #The bedsensor was already registered
+            logger.debug('This is a registered bedsensor: %s' %bed_ID)
+            new = False
+
+        return new
 
     def get_date(self):
         """
@@ -56,8 +67,9 @@ class Bedsensor(object):
         logger.info("%s: The bedsensor %s sent %s" % (date.isoformat(), bed_ID, DR1))
 
         occupency = bed_reasoning.occupency(DR1)
-        if occupency is not self.occupency:
-            self.occupency = occupency
+        logger.debug('occupency level: %s' %occupency)
+        if occupency is not self.memory[bed_ID].get('occupency'):
+            self.memory[bed_ID]['occupency'] = occupency
             meta_data['type'] = 'event'
             data = {'sensor' : bed_ID,
                     'value': occupency,
@@ -74,18 +86,33 @@ class Bedsensor(object):
                     'date': date.isoformat()}
         return meta_data, data
 
-    def initialize(self, sample_bits):
+    def initialize(self, sample_bits, bed_ID):
         """
-        Initialization signal
+        Initialization of a bedsensor
         """
 
-        logger.info('The signal matched with the bedsensor initialization patern')
+        logger.info('The signal matched with the bedsensor initialization patern.')
 
-        self.nb_FSR = int(sample_bits[1])
-        self.nb_FSC = int(sample_bits[2])
-        self.t0 = self.get_date()
+        if self.new_sensor(bed_ID):
+            logger.info('Initialization of a new bedsensor: %s' %bed_ID)
+        else:
+            logger.info('Reset the bedsensor: %s' %bed_ID)
 
-        logger.info('The bedsensor is equiped with %s FSR sensors and %s FSC sensors' % (self.nb_FSR, self.nb_FSC))
+        self.mac_id = bed_ID
+        nb_FSR = int(sample_bits[1])
+        nb_FSC = int(sample_bits[2])
+        t0 = self.get_date().isoformat()
+        occupency = DEFAULT_OCCUPENCY
+        self.memory[self.mac_id] = {
+            'nb_FSR' : nb_FSR,
+            'nb_FSC' : nb_FSC,
+            'occupency' : occupency,
+            't0' : t0
+        }
+
+        logger.info('The bedsensor %s is equiped with %s FSR sensors and %s FSC sensors' % (self.mac_id, nb_FSR, nb_FSC))
+
+        logger.debug('new sensor info:%s' %self.memory[self.mac_id])
 
 
     def matches(self, signal):
@@ -113,18 +140,28 @@ class Bedsensor(object):
         if match:
             date = self.get_date()
 
+            #Get the ID of the bedsensor sending the signal
+            bed_addr = 0
+            for octet in signal_addr:
+                bed_addr = (bed_addr*256)+ord(octet)
+
+            bed_ID = 'BED-'+str(bed_addr)
+
+            logger.debug('Address of the Bedproto: %s' % bed_ID)
+
+            #Create a list with the signal parts
             sample_bits = signal_data.split(",")
 
             if match.group('data_type') == 'YOP':
 
-                self.initialize(sample_bits)
+                #Initialization signal
+
+                self.initialize(sample_bits, bed_ID)
                 return None, None
 
             else:
 
-                """
-                FSR data signal
-                """
+                #FSR data signal
 
 #                if integrity(signal) == False:
 #                    return None, None
@@ -136,7 +173,8 @@ class Bedsensor(object):
                     logger.error('There are %s fragments, this is less than the %s fragments expected in a sample' % (len(sample_bits), FRAGMENT_NUMBER))
                     return None, None
 
-
+                #Time of the bedsensor in ms since the initialisation
+                #TODO: Associate this value with the real acquisition time in using the t0 value.
                 sample_ID = sample_bits[1]
                 bed_time = 0
                 for octet in sample_ID:
@@ -144,16 +182,7 @@ class Bedsensor(object):
 
                 logger.debug('Time of the Bedproto: %s' % bed_time)
 
-                bed_addr = 0
-                for octet in signal_addr:
-                    bed_addr = (bed_addr*256)+ord(octet)
-
-                logger.debug('Address of the Bedproto: %s' % bed_addr)
-                # bed_addr = int(signal_addr, 16)
-
-
-                bed_ID = 'BED-'+str(bed_addr)
-
+                #Get the values of the 8 FSR of DR1 sample
                 sample_data = sample_bits[2]
                 DR1 = {}
                 i = 0
