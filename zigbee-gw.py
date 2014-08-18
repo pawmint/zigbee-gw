@@ -16,18 +16,23 @@ def main():
     logger.info("Starting application")
     logger.info('Server: %s\n'
                 'Port: %s\n'
+                'Password: %s\n'
                 'House: %s\n'
-                'Username: %s\n'
+                'Gateway: %s\n'
                 'Timezone: %s' % (gate.config.server,
                                   gate.config.port,
+                                  gate.config.password,
                                   gate.config.house,
-                                  gate.config.username,
+                                  gate.config.gateway,
                                   gate.timezone))
 
-
-    for sensor, data in zigbee_reader.run(gate.timezone):
-        topic = "/zigbee/sensor/%s" % sensor
+    for meta_data, data in zigbee_reader.run(gate.timezone):
+        if meta_data['type'] == 'error':
+            break
+        topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'], meta_data['type'])
+        data['house'] = gate.config.house
         gate.push(topic, data)
+
 
 if __name__ == "__main__":
     main()
