@@ -73,7 +73,7 @@ def gather_data(signal, sensors_list):
 
     return meta_data, data
 
-def import_sensors(timezone):
+def import_sensors(gate):
     """
     Method to manage:
     The modules importation of the sensors described in the file 'ressource/conf.ini'.
@@ -96,13 +96,13 @@ def import_sensors(timezone):
         #Create class objects
         sensor_object = getattr(module, sensor)
         #Instanciate the class objects
-        sensors_classes.append(sensor_object(timezone))
+        sensors_classes.append(sensor_object(gate))
 
     return sensors_classes
 
-def run(timezone):
+def run(gate):
 
-    sensors_list = import_sensors(timezone)
+    sensors_list = import_sensors(gate)
 
     i = 0
     while i < NB_TRY:

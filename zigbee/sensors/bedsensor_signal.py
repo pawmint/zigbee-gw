@@ -13,8 +13,8 @@ DEFAULT_ID = None
 DEFAULT_OCCUPENCY = 'off'
 
 class Bedsensor(object):
-    def __init__(self, timezone):
-        self.timezone = timezone
+    def __init__(self, gate):
+        self.timezone = gate.timezone
         self.mac_id = DEFAULT_ID
         self.memory = {}
 
@@ -45,9 +45,9 @@ class Bedsensor(object):
 
     def get_date(self):
         """
-        This method return the date of the computer regarding of the timezone.
+        This method return the date of the computer regarding of the gate.timezone.
         """
-        tz = pytz.timezone(str(self.timezone))
+        tz = pytz.gate.timezone(str(self.gate.timezone))
         date = tz.localize(datetime(datetime.now().year,
                            datetime.now().month,
                            datetime.now().day,
