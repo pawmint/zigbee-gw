@@ -7,6 +7,11 @@ from zigbee import zigbee_reader
 from ubigate import Ubigate
 from ubigate import log, logger
 
+coucou = "I am not a number !"
+
+def on_message(client, userdata, message):
+    print("server: " + str(message.payload) + "' on topic '"
+        + message.topic + "' with QoS " + str(message.qos) + " Bulbi: " + coucou)
 
 def main():
     gate = Ubigate('resources/conf.ini')
@@ -25,6 +30,9 @@ def main():
                                   gate.config.house,
                                   gate.config.gateway,
                                   gate.timezone))
+
+    gate.subscribe("test/callback", on_message)
+    #TO DO need to add a regular sync with the brocker to get the information of the callback methods
 
     for meta_data, data in zigbee_reader.run(gate.timezone):
         if meta_data['type'] == 'error':
