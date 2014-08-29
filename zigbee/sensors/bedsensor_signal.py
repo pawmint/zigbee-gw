@@ -11,13 +11,20 @@ FRAGMENT_NUMBER = 3
 
 DEFAULT_ID = None
 DEFAULT_OCCUPENCY = 'off'
+DEFAULT_FSR = 1
+DEFAULT_FSC = 0
 
 class Bedsensor(object):
     def __init__(self, gate):
-        self.timezone = gate.timezone
+        self.gate = gate
         self.mac_id = DEFAULT_ID
         self.memory = {}
 
+    def publication(self, meta_data, data):
+        topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'],
+                                          meta_data['type'])
+        data['house'] = self.gate.config.house
+        self.gate.push(topic, data)
 
     def integrity(self, signal):
         if sys.getsizeof(signal) == SIZEOF_DR1:
@@ -47,7 +54,7 @@ class Bedsensor(object):
         """
         This method return the date of the computer regarding of the gate.timezone.
         """
-        tz = pytz.gate.timezone(str(self.gate.timezone))
+        tz = pytz.timezone(str(self.gate.timezone))
         date = tz.localize(datetime(datetime.now().year,
                            datetime.now().month,
                            datetime.now().day,
@@ -166,6 +173,25 @@ class Bedsensor(object):
 #                if integrity(signal) == False:
 #                    return None, None
 
+                #If the bedsensor was not known.
+                if self.new_sensor(bed_ID):
+                    logger.info('Message reveived by an unknown bedsensor')
+                    logger.info('Default instantiation of: %s' %bed_ID)
+                    self.mac_id = bed_ID
+                    nb_FSR = DEFAULT_FSR
+                    nb_FSC = DEFAULT_FSC
+                    t0 = self.get_date().isoformat()
+                    occupency = DEFAULT_OCCUPENCY
+                    self.memory[self.mac_id] = {
+                        'nb_FSR' : nb_FSR,
+                        'nb_FSC' : nb_FSC,
+                        'occupency' : occupency,
+                        't0' : t0
+                    }
+                else:
+                    logger.debug('The bedsensor is already known')
+
+
                 logger.info('The signal matchs with the bedsensor DR1 data patern')
                 logger.debug('The DR1 sample is: %s' %sample_bits)
 
@@ -199,8 +225,11 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
+                meta_data, data = self.formalize(DR1, bed_ID, bed_time, date, match.group('data_type'))
 
-                return self.formalize(DR1, bed_ID, bed_time, date, match.group('data_type'))
+                self.publication(meta_data, data)
+
+                return meta_data, data
 
         else:
             logger.debug('The signal is not matching with the bedsensor patern')

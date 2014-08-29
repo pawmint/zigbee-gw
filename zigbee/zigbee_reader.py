@@ -122,8 +122,12 @@ def run(gate):
         try:
             meta_data, data = gather_data(signal, sensors_list)
             logger.debug('data received: %s' % data)
-            if data is not None:
-                yield meta_data, data
+#            if data to send with Xbee:
+#                send data through Xbee
+            #If there is an error and zigbee-gw has to be shut down
+            if meta_data['type'] == 'error':
+                yield meta_data, None
+
         except TypeError:
             pass
 

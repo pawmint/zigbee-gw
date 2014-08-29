@@ -34,12 +34,10 @@ def main():
     gate.subscribe("test/callback", on_message)
     #TO DO need to add a regular sync with the brocker to get the information of the callback methods
 
+    # interruption of the program in case of error
     for meta_data, data in zigbee_reader.run(gate):
         if meta_data['type'] == 'error':
             break
-        topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'], meta_data['type'])
-        data['house'] = gate.config.house
-        gate.push(topic, data)
 
 
 if __name__ == "__main__":
