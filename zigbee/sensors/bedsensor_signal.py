@@ -64,33 +64,37 @@ class Bedsensor(object):
                            datetime.now().microsecond))
         return date
 
-    def formalize(self, DR1, bed_ID, bed_time, date, format):
+    def formalize_signal(self, DR1, bed_ID, bed_time, date, format):
         """
-        This method formalizes the data in adding meta data for the zigbee-gw program and the server interpretation.
+        This method formalizes a signal in adding meta data for the server interpretation.
         """
-        meta_data = {'type' : None,
+        meta_data = {'type' : 'signal',
                      'sensor': 'bedsensor'}
 
         logger.info("%s: The bedsensor %s sent %s" % (date.isoformat(), bed_ID, DR1))
 
-        occupency = bed_reasoning.occupency(DR1)
-        logger.debug('occupency level: %s' %occupency)
-        if occupency is not self.memory[bed_ID].get('occupency'):
-            self.memory[bed_ID]['occupency'] = occupency
-            meta_data['type'] = 'event'
-            data = {'sensor' : bed_ID,
-                    'value': occupency,
-                    'signal_time' : bed_time,
-                    'date': date.isoformat()}
-            logger.info("Occupency level: %s" % occupency)
+        data = {'sensor' : bed_ID,
+                'format': format,
+                'sample': DR1,
+                'signal_time' : bed_time,
+                'date': date.isoformat()}
 
-        else:
-            meta_data['type'] = 'signal'
-            data = {'sensor' : bed_ID,
-                    'format': format,
-                    'sample': DR1,
-                    'signal_time' : bed_time,
-                    'date': date.isoformat()}
+        return meta_data, data
+
+    def formalize_event(self, occupency, bed_ID, bed_time, date):
+        """
+        This method formalizes an event in adding meta data for the server interpretation.
+        """
+        meta_data = {'type' : 'event',
+                     'sensor': 'bedsensor'}
+
+        logger.info("%s: The bedsensor %s sent %s" % (date.isoformat(), bed_ID, occupency))
+
+        data = {'sensor' : bed_ID,
+                'value': occupency,
+                'signal_time' : bed_time,
+                'date': date.isoformat()}
+
         return meta_data, data
 
     def initialize(self, sample_bits, bed_ID):
@@ -173,7 +177,7 @@ class Bedsensor(object):
 #                if integrity(signal) == False:
 #                    return None, None
 
-                #If the bedsensor was not known.
+                #If the signal come from an still unknown bedsensor.
                 if self.new_sensor(bed_ID):
                     logger.info('Message reveived by an unknown bedsensor')
                     logger.info('Default instantiation of: %s' %bed_ID)
@@ -225,8 +229,16 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-                meta_data, data = self.formalize(DR1, bed_ID, bed_time, date, match.group('data_type'))
+                occupency = bed_reasoning.occupency(DR1)
+                logger.debug('occupency level: %s' %occupency)
+                if occupency is not self.memory[bed_ID].get('occupency'):
+                    self.memory[bed_ID]['occupency'] = occupency
+                    logger.info("Occupency level: %s" % occupency)
+                    meta_data, data = self.formalize_event(occupency, bed_ID, bed_time, date)
+                    self.publication(meta_data, data)
 
+
+                meta_data, data = self.formalize_signal(DR1, bed_ID, bed_time, date, match.group('data_type'))
                 self.publication(meta_data, data)
 
                 return meta_data, data
