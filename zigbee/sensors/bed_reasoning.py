@@ -1,12 +1,5 @@
-import configparser
 
-config = configparser.ConfigParser()
-config.read('zigbee/sensors/bedconf.txt')
-THRESHOLD = int(config['BEDSENSOR']['THRESHOLD'])
-
-#THRESHOLD = 500
-
-def occupency(DR1):
+def occupency(DR1, THRESHOLD):
     """
     Methode to define if the bed is occupied or not in using one single sensor
     TODO : read the file only one time.

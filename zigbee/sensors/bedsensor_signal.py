@@ -2,6 +2,7 @@ from datetime import datetime
 import pytz
 import re
 import sys
+import configparser
 
 from zigbee.sensors import bed_reasoning
 from ubigate import logger
@@ -13,6 +14,10 @@ DEFAULT_ID = None
 DEFAULT_OCCUPENCY = 'off'
 DEFAULT_FSR = 1
 DEFAULT_FSC = 0
+
+configbed = configparser.ConfigParser()
+configbed.read('zigbee/sensors/bedconf.txt')
+THRESHOLD = int(configbed['BEDSENSOR']['THRESHOLD'])
 
 class Bedsensor(object):
     def __init__(self, gate):
@@ -229,7 +234,7 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-                occupency = bed_reasoning.occupency(DR1)
+                occupency = bed_reasoning.occupency(DR1, THRESHOLD)
                 logger.debug('occupency level: %s' %occupency)
                 if occupency is not self.memory[bed_ID].get('occupency'):
                     self.memory[bed_ID]['occupency'] = occupency
