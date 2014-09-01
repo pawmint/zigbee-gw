@@ -5,6 +5,7 @@ import sys
 import configparser
 
 from zigbee.sensors import bed_reasoning
+from zigbee.sensors import callbacks
 from ubigate import logger
 
 SIZEOF_DR1 = 48
@@ -14,16 +15,32 @@ DEFAULT_ID = None
 DEFAULT_OCCUPENCY = 'off'
 DEFAULT_FSR = 1
 DEFAULT_FSC = 0
-
-configbed = configparser.ConfigParser()
-configbed.read('zigbee/sensors/bedconf.txt')
-THRESHOLD = int(configbed['BEDSENSOR']['THRESHOLD'])
+DEFAULT_ORDER = None
+DEFAULT_THRESHOLD = 500
 
 class Bedsensor(object):
     def __init__(self, gate):
         self.gate = gate
         self.mac_id = DEFAULT_ID
         self.memory = {}
+        self.threshold = DEFAULT_THRESHOLD
+        self._init_smartbeds()
+
+    def on_message(bedClient, client, userdata, message):
+        bedClient.memory = callbacks.method(userdata, message, bedClient.memory)
+
+    def _init_smartbeds(self):
+        """
+        Get the configuration of the bed and subscribe to the topic with the method present in the callbacks.py
+        """
+        try:
+            configbed = configparser.ConfigParser()
+            configbed.read('zigbee/sensors/bedconf.txt')
+            self.threshold = int(configbed['BEDSENSOR']['THRESHOLD'])
+        except:
+            logger.warning('Impossible to get the configuration of the bed')
+
+        self.gate.subscribe("/zigbee/sensor/bedsensor/orders", self.on_message)
 
     def publication(self, meta_data, data):
         topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'],
@@ -123,7 +140,8 @@ class Bedsensor(object):
             'nb_FSR' : nb_FSR,
             'nb_FSC' : nb_FSC,
             'occupency' : occupency,
-            't0' : t0
+            't0' : t0,
+            'order' : DEFAULT_ORDER
         }
 
         logger.info('The bedsensor %s is equiped with %s FSR sensors and %s FSC sensors' % (self.mac_id, nb_FSR, nb_FSC))
@@ -184,8 +202,8 @@ class Bedsensor(object):
 
                 #If the signal come from an still unknown bedsensor.
                 if self.new_sensor(bed_ID):
-                    logger.info('Message reveived by an unknown bedsensor')
-                    logger.info('Default instantiation of: %s' %bed_ID)
+                    logger.warning('Message reveived by an unknown bedsensor')
+                    logger.warning('Default instantiation of: %s' %bed_ID)
                     self.mac_id = bed_ID
                     nb_FSR = DEFAULT_FSR
                     nb_FSC = DEFAULT_FSC
@@ -195,7 +213,8 @@ class Bedsensor(object):
                         'nb_FSR' : nb_FSR,
                         'nb_FSC' : nb_FSC,
                         'occupency' : occupency,
-                        't0' : t0
+                        't0' : t0,
+                        'order' : DEFAULT_ORDER
                     }
                 else:
                     logger.debug('The bedsensor is already known')
@@ -234,7 +253,7 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-                occupency = bed_reasoning.occupency(DR1, THRESHOLD)
+                occupency = bed_reasoning.occupency(DR1, self.threshold)
                 logger.debug('occupency level: %s' %occupency)
                 if occupency is not self.memory[bed_ID].get('occupency'):
                     self.memory[bed_ID]['occupency'] = occupency
