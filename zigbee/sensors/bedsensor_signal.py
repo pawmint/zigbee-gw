@@ -40,7 +40,7 @@ class Bedsensor(object):
         except:
             logger.warning('Impossible to get the configuration of the bed')
 
-        self.gate.subscribe("/zigbee/sensor/bedsensor/orders", self.on_message)
+        self.gate.callback_subscribe("/zigbee/sensor/bedsensor/orders", self.on_message)
 
     def publication(self, meta_data, data):
         topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'],
