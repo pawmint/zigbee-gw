@@ -4,8 +4,8 @@ import re
 import sys
 import configparser
 
-from zigbee.sensors import bed_reasoning
-from zigbee.sensors import callbacks
+from zigbee.sensors import reasoning
+from zigbee.sensors import callback
 from ubigate import logger
 
 SIZEOF_DR1 = 48
@@ -18,7 +18,7 @@ DEFAULT_FSC = 0
 DEFAULT_ORDER = None
 DEFAULT_THRESHOLD = 500
 
-class Bedsensor(object):
+class Smartbeds(object):
     def __init__(self, gate):
         self.gate = gate
         self.mac_id = DEFAULT_ID
@@ -27,11 +27,11 @@ class Bedsensor(object):
         self._init_smartbeds()
 
     def bed_submethod(bedClient, client, userdata, message):
-        bedClient.memory = callbacks.method(userdata, message, bedClient.memory)
+        bedClient.memory = callback.method(userdata, message, bedClient.memory)
 
     def _init_smartbeds(self):
         """
-        Get the configuration of the bed and subscribe to the topic with the method present in the callbacks.py
+        Get the configuration of the bed and subscribe to the topic with the method present in the callback.py
         """
         try:
             configbed = configparser.ConfigParser()
@@ -152,9 +152,6 @@ class Bedsensor(object):
 
 
     def matches(self, signal):
-
-        signal_data = signal['rf_data']
-        signal_addr = signal['source_addr']
         """
         The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
         """
@@ -165,6 +162,9 @@ class Bedsensor(object):
         #example: $YOP,08,02\n
 
         #$DR1,\x00\x10\x02\r,\n\x90\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\n
+
+        signal_data = signal['rf_data']
+        signal_addr = signal['source_addr']
 
         logger.debug('Checking the signal "%s" in bedsensor program' % signal_data)
 
@@ -255,7 +255,7 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-                occupency = bed_reasoning.occupency(DR1, self.threshold)
+                occupency = reasoning.occupency(DR1, self.threshold)
                 logger.debug('occupency level: %s' %occupency)
                 if occupency is not self.memory[bed_ID].get('occupency'):
                     self.memory[bed_ID]['occupency'] = occupency
