@@ -1,7 +1,7 @@
 
 from ubigate import logger
 
-def method(userdata, message, memory):
+def  method(userdata, message, memory):
     """
     Method applied when the server send an order. It write the order in the memory of the bedsensor corresponding.
     """

@@ -26,7 +26,7 @@ class Bedsensor(object):
         self.threshold = DEFAULT_THRESHOLD
         self._init_smartbeds()
 
-    def on_message(bedClient, client, userdata, message):
+    def bed_submethod(bedClient, client, userdata, message):
         bedClient.memory = callbacks.method(userdata, message, bedClient.memory)
 
     def _init_smartbeds(self):
@@ -40,7 +40,9 @@ class Bedsensor(object):
         except:
             logger.warning('Impossible to get the configuration of the bed')
 
-        self.gate.callback_subscribe("/zigbee/sensor/bedsensor/orders", self.on_message)
+        subscribing_topic = "house/%s/zigbee/sensor/bedsensor/orders" % (self.gate.config.house)
+        self.gate.callback_subscribe(str(subscribing_topic), self.bed_submethod)
+        logger.info("Sending of the submethod on the topic %s" %str(subscribing_topic))
 
     def publication(self, meta_data, data):
         topic = "/zigbee/sensor/%s/%s" % (meta_data['sensor'],
