@@ -120,12 +120,14 @@ def run(gate):
         signal = read_zigbee()
         logger.info('Data received: %s' % signal)
         try:
-            meta_data, data = gather_data(signal, sensors_list)
-            logger.debug('data received: %s' % data)
-#            if data to send with Xbee:
+            response_type, response_code = gather_data(signal, sensors_list)
+
+            if response_type == 'response':
+                logger.info('responding %s to the bedsensor' %response_code)
 #                send data through Xbee
+
             #If there is an error and zigbee-gw has to be shut down
-            if meta_data['type'] == 'error':
+            if response_type == 'error':
                 yield meta_data, None
 
         except TypeError:

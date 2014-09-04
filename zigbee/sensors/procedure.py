@@ -14,6 +14,14 @@ DEFAULT_FSC = 0
 DEFAULT_ORDER = None
 DEFAULT_THRESHOLD = 500
 
+RESPONSE_TYPE = 'response'
+RESPONSE_OK = '$OK\n'
+
+# A dictionary to interprete the order from the server
+orders_dict = {
+    'battery':'$STA\n',
+    'nbSensor' : '$STA\n'
+}
 
 def integrity(signal):
     if sys.getsizeof(signal) == SIZEOF_DR1:
@@ -88,7 +96,7 @@ def formalize_event(occupency, bed_ID, bed_time, date, gate):
     meta_data = {'type' : 'event',
                  'sensor': 'bedsensor'}
 
-    logger.info("%s: The bedsensor %s sent %s" % (date.isoformat(), bed_ID, occupency))
+    logger.info("%s: The bedsensor %s occupency is %s" % (date.isoformat(), bed_ID, occupency))
 
     data = {'sensor' : bed_ID,
             'value': occupency,
@@ -135,7 +143,7 @@ def YOPtram(sample_bits, bed_ID, memory, date):
 
     logger.debug('new sensor info:%s' %memory[mac_id])
 
-    return memory
+    return RESPONSE_TYPE, RESPONSE_OK, memory
 
 
 def DR1tram(sample_bits, bed_ID, memory, date, threshold, gate):
@@ -189,11 +197,29 @@ def DR1tram(sample_bits, bed_ID, memory, date, threshold, gate):
     if occupency is not memory[bed_ID].get('occupency'):
         memory[bed_ID]['occupency'] = occupency
         logger.info("Occupency level: %s" % occupency)
-        meta_data, data = formalize_event(occupency, bed_ID, bed_time, date)
-        publication(meta_data, data)
+        meta_data, data = formalize_event(occupency, bed_ID, bed_time, date, gate)
+        publication(meta_data, data, gate)
 
 
-    meta_data, data = formalize_signal(DR1, bed_ID, bed_time, date, 'DR1')
+    meta_data, data = formalize_signal(DR1, bed_ID, bed_time, date, 'DR1', gate)
     publication(meta_data, data, gate)
 
-    return meta_data, data, memory
+    return RESPONSE_TYPE, RESPONSE_OK, memory
+
+
+def orderTRAM(order):
+    orderCode = None
+
+    order_list = list(orders_dict.keys())
+    logger.debug('list of the orders registered: %s' %order_list)
+
+    if order_list.count(order) == 0:
+        logger.warning('The order %s is not known' % order)
+    else:
+        orderCode = orders_dict.get(order)
+        logger.debug('The code %s will be send to the bedsensor' % orderCode)
+
+    return orderCode
+
+
+

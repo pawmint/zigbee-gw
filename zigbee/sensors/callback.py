@@ -14,7 +14,6 @@ def  method(userdata, message, memory):
         order_bedID = message_bits[0]
         order_value = message_bits[1]
 
-        order_bedID = 'BED-0'
         memory[order_bedID]['order'] = order_value
     except IndexError :
         logger.error("The order received is not conform (<BED-ID>|<order>)")

@@ -71,6 +71,20 @@ class Smartbeds(object):
 
         return bed_ID
 
+    def new_order(self, bed_ID):
+        state = False
+
+        if self.memory[bed_ID].get('order') is not None:
+            logger.debug("There is an order: %s" % self.memory[bed_ID].get('order'))
+            state = True
+
+        return state
+
+
+    def get_order(self, bed_ID):
+        orderCode = procedure.orderTRAM(self.memory[bed_ID].get('order'))
+        return orderCode
+
     def matches(self, signal):
         """
         The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
@@ -88,6 +102,10 @@ class Smartbeds(object):
 
         logger.debug('Checking the signal "%s" in bedsensor program' % signal_data)
 
+
+        response_type = None
+        response_code = None
+
         #TO DO put this in procedure
         pattern = (r'^\$(?P<data_type>YOP|DR1).*$\n')
         regexp = re.compile(pattern)
@@ -102,16 +120,18 @@ class Smartbeds(object):
             if match.group('data_type') == 'YOP':
 
                 #Initialization signal
-                self.memory = procedure.YOPtram(sample_bits, bed_ID, self.memory, date)
-                return None, None
+                response_type, response_code, self.memory = procedure.YOPtram(sample_bits, bed_ID, self.memory, date)
 
             if match.group('data_type') == 'DR1':
 
                 #FSR data signal
-                meta_data, data, self.memory = procedure.DR1tram(sample_bits, bed_ID, self.memory, date, self.threshold, self.gate)
-                return meta_data, data
+                response_type, response_code, self.memory = procedure.DR1tram(sample_bits, bed_ID, self.memory, date, self.threshold, self.gate)
+
+            if self.new_order(bed_ID):
+                response_code = self.get_order(bed_ID)
+                self.memory[bed_ID]['order'] = None
 
         else:
             logger.debug('The signal is not matching with the bedsensor patern')
 
-            return None, None
+        return response_type, response_code
