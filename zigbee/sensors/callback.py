@@ -7,7 +7,7 @@ def  method(userdata, message, memory):
     """
     logger.info("order received: " + str(message.payload) + "' on topic '"
         + message.topic + "' with QoS " + str(message.qos))
-    logger.info("The momory state is: %s" %memory)
+    logger.info("The memory state is: %s" %memory)
 
     try:
         message_bits = message.payload.split("|")

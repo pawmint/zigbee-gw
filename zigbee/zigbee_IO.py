@@ -124,7 +124,7 @@ def run(gate):
 
             if response_type == 'response':
                 logger.info('responding %s to the bedsensor' %response_code)
-#                send data through Xbee
+#                xbee.send(signal['source_addr'], 'A', response_type)
 
             #If there is an error and zigbee-gw has to be shut down
             if response_type == 'error':

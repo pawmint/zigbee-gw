@@ -132,6 +132,6 @@ class Smartbeds(object):
                 self.memory[bed_ID]['order'] = None
 
         else:
-            logger.debug('The signal is not matching with the bedsensor patern')
+            logger.debug('The signal is not matching with the bedsensor pattern')
 
         return response_type, response_code
