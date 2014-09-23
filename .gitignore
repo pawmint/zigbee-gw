@@ -48,3 +48,4 @@ docs/_build/
 
 # config file
 resources/conf.ini
+resources/conf.json

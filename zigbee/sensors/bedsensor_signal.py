@@ -43,32 +43,6 @@ class Bedsensor(object):
                            datetime.now().microsecond))
         return date
 
-    def formalize(self, DR1, bed_ID, bed_time, date, format):
-        """
-        This method formalizes the data in adding meta data for the zigbee-gw program and the server interpretation.
-        TODO: Add a memory to know the previous occupency state of the bedsensor
-        """
-        meta_data = {'type' : None,
-                     'sensor': 'bedsensor'}
-
-        occupency = bed_reasoning.occupency(DR1)
-        if occupency is not self.occupency:
-            self.occupency = occupency
-            meta_data['type'] = 'event'
-            data = {'sensor' : bed_ID,
-                    'value': occupency,
-                    'signal_time' : bed_time,
-                    'date': date.isoformat()}
-
-        else:
-            meta_data['type'] = 'signal'
-            data = {'sensor' : bed_ID,
-                    'format': format,
-                    'sample': DR1,
-                    'signal_time' : bed_time,
-                    'date': date.isoformat()}
-        return meta_data, data
-
     def initialize(self, sample_bits):
         """
         Initialization signal
@@ -84,22 +58,21 @@ class Bedsensor(object):
 
 
     def matches(self, signal):
-
-        signal_data = signal['rf_data']
-        signal_addr = signal['source_addr']
         """
         The method to check if the signal received is corresponding with the bedsensor patern. If the signal is corresponding, we extract the information corresponding
         """
-        #Data FSR 1spl   $ DR1 , ID , R0 R1 R2 R3 R4 R5 R6 R7 \n
-        #example: $DR1,\x00\x13\xa2\x00@\xa1N\xba,\x00\x00\x06\x84\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n
 
-        #The other simple possible is $YOP,nb_FSR,nbFSC\n
-        #example: $YOP,08,02\n
+        signal_data = signal['rf_data']
+        signal_addr = signal['source_addr']
+        # Data FSR 1spl   $ DR1 , ID , R0 R1 R2 R3 R4 R5 R6 R7 \n
+        # example: $DR1,\x00\x13\xa2\x00@\xa1N\xba,\x00\x00\x06\x84\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n
 
-        #$DR1,\x00\x10\x02\r,\n\x90\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\n
+        # The other simple possible is $YOP,nb_FSR,nbFSC\n
+        # example: $YOP,08,02\n
+
+        # $DR1,\x00\x10\x02\r,\n\x90\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\n
 
         logger.debug('Checking the signal "%s" in bedsensor program' % signal_data)
-
 
         pattern = (r'^\$(?P<data_type>YOP|DR1).*$\n')
         regexp = re.compile(pattern)
@@ -113,24 +86,20 @@ class Bedsensor(object):
             if match.group('data_type') == 'YOP':
 
                 self.initialize(sample_bits)
-                return None, None
+                return None
 
             else:
+                # FSR data signal
 
-                """
-                FSR data signal
-                """
-
-#                if integrity(signal) == False:
-#                    return None, None
+                # if integrity(signal) == False:
+                #     return None, None
 
                 logger.info('The signal matchs with the bedsensor DR1 data patern')
                 logger.debug('The DR1 sample is: %s' %sample_bits)
 
                 if len(sample_bits) < FRAGMENT_NUMBER: # It is necessary to put a condition because the Arduino sending binary values can send unexpected '/n'.
                     logger.error('There are %s fragments, this is less than the %s fragments expected in a sample' % (len(sample_bits), FRAGMENT_NUMBER))
-                    return None, None
-
+                    return None
 
                 sample_ID = sample_bits[1]
                 bed_time = 0
@@ -143,7 +112,6 @@ class Bedsensor(object):
 
                 # bed_addr = int(signal_addr, 16)
 
-
                 bed_ID = 'BED-'+str(bed_addr)
 
                 sample_data = sample_bits[2]
@@ -154,7 +122,7 @@ class Bedsensor(object):
                         utf8 = sample_data[i]+sample_data[i+1]
                     except:
                         logger.error('There are less than 8 values received')
-                        return None, None
+                        return None
                     DR1[val] = 0
                     for octet in utf8:
                         DR1[val] = (DR1[val]*256 )+ord(octet)
@@ -162,10 +130,23 @@ class Bedsensor(object):
 
                 logger.debug('Measures of the FSR: %s, date: %s' % (DR1, date.isoformat()))
 
-
-                return self.formalize(DR1, bed_ID, bed_time, date, match.group('data_type'))
-
+                data = None
+                occupency = bed_reasoning.occupency(DR1)
+                if occupency is not self.occupency:
+                    data = {'sensor': bed_ID,
+                            'type': 'event',
+                            'value': occupency,
+                            'signal_time': bed_time,
+                            'date': date.isoformat()}
+                else:
+                    data = {'sensor': bed_ID,
+                            'type': 'signal',
+                            'format': match.group('data_type'),
+                            'sample': DR1,
+                            'signal_time': bed_time,
+                            'date': date.isoformat()}
+                return data
         else:
             logger.debug('The signal is not matching with the bedsensor patern')
 
-            return None, None
+            return None

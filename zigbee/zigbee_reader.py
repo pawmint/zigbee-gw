@@ -57,18 +57,8 @@ def read_zigbee():
     except TypeError:
         return None
 
-def gather_data(signal, bed_signal):
-
-    data = None
-    meta_data = None
-
-    meta_data, data = bed_signal.matches(signal)
-
-    return meta_data, data
-
 
 def run(timezone):
-
     bed_signal = Bedsensor(timezone)
 
     i = 0
@@ -80,20 +70,15 @@ def run(timezone):
 
     if i == NB_TRY:
         logger.error('The program fail to convert the Xbee module in API mode, try to restart')
-        meta_data = {'type': 'error'}
-        yield meta_data, None
+        yield {'type': 'error'}
 
     while True:
         signal = read_zigbee()
         logger.debug('Data received: %s' % signal)
         try:
-            meta_data, data = gather_data(signal, bed_signal)
+            data = bed_signal.matches(signal)
             logger.debug('data received: %s' % data)
             if data is not None:
-                yield meta_data, data
+                yield data
         except TypeError:
             pass
-
-
-
-
