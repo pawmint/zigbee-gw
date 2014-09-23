@@ -138,6 +138,7 @@ class Bedsensor(object):
                             'value': occupency,
                             'signal_time': bed_time,
                             'date': date.isoformat()}
+                    self.occupency = occupency
                 else:
                     data = {'sensor': bed_ID,
                             'type': 'signal',
