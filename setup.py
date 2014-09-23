@@ -22,7 +22,7 @@ setup(
         'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@v0.0.3-alpha#egg=UbiGate-0.0.3-alpha"
+        "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@v0.0.4-alpha#egg=UbiGate-0.0.4-alpha"
     ],
     license='Copyright',
     zip_safe=True,  # To be verified
