@@ -17,14 +17,14 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'ubigate>=0.0.4-alpha',
+        'ubigate>=0.1',
         'pyserial>=2.7',
         'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@v0.0.4-alpha#egg=UbiGate-0.0.4-alpha"
+        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.1#egg=UbiGate-0.1"
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': ['zigbee-gw=zigbee.gateway:main'],
     },
     license='Copyright',

@@ -9,7 +9,8 @@ from ubigate import log, logger
 
 
 def main():
-    gate = Ubigate('resources/conf.json')
+    gate = Ubigate('zigbee-gw',
+                   default_file='resources/conf.json.default')
     log.add_logger_file('data.log', logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
@@ -18,10 +19,8 @@ def main():
     for gateway in gate.config['gateways']:
         logger.info('Server: %s\n'
                     'Port: %s\n'
-                    'Password: %s\n'
                     'Gateway: %s\n' % (gateway['server'],
                                        gateway['port'],
-                                       gateway['password'],
                                        gateway['name']))
 
     for data in zigbee_reader.run(gate.timezone):
