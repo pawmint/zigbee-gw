@@ -6,7 +6,7 @@ This is the intern zigbee gateway program for ubigate. It each sensors present i
 This program have to be set up on the beaglebone when sensors using zigbee are installed in a home.
 
 ##How To configure the BeagleBone:
-Clone the git repository for zigbe-gw in /home and switch to the branch dev.
+Clone the git repository for zigbe-gw in /home and switch to the branch bedproto.
 
 Create a virtual environment.
 

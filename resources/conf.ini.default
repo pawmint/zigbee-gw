@@ -1,6 +1,0 @@
-[Ubigate]
-server = localhost
-port = 8000
-gateway = localdev
-house = 2
-username = clement

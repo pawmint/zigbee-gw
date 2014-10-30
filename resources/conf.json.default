@@ -1,0 +1,17 @@
+{
+    "gateways": [
+        {
+            "name": "<pokemon_name>_zigbee",
+            "password": "pikachu",
+            "server": "localhost",
+            "port": 8000
+        }
+    ],
+    "houses": {
+        "1": {
+            "sensors": [
+                "BED-5526146523791874"
+            ]
+        }
+    }
+}

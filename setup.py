@@ -8,7 +8,7 @@ readme = open('README.md').read()
 
 setup(
     name='Zigbee-gw',
-    version='0.1',
+    version='0.2-beta',
     description='A gateway to use the sensors that communicate through zigbee',
     long_description=readme,
     author='Clément Pallière',
@@ -17,11 +17,12 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'ubigate>=0.0.2',
-        'pyserial>=2.7'
+        'ubigate>=0.0.4-alpha',
+        'pyserial>=2.7',
+        'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@0.0.2#egg=ubiGATE-0.0.2"
+        "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@v0.0.4-alpha#egg=UbiGate-0.0.4-alpha"
     ],
     license='Copyright',
     zip_safe=True,  # To be verified
