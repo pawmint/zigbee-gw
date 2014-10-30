@@ -24,6 +24,9 @@ setup(
     dependency_links=[
         "git+ssh://git@github.com/RomainEndelin/ubiGATE.git@v0.0.4-alpha#egg=UbiGate-0.0.4-alpha"
     ],
+    entry_points = {
+        'console_scripts': ['zigbee-gw=zigbee.gateway:main'],
+    },
     license='Copyright',
     zip_safe=True,  # To be verified
     classifiers=[
