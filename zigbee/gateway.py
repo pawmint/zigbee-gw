@@ -30,7 +30,7 @@ def main():
             except KeyError:
                 logger.warning("Unknown sensor: %s" % data['sensor'])
             else:
-                topic = "/zigbee/sensor/%s" % data['sensor']
+                topic = "/zigbee/sensor/%s/%s" % (data['sensor'], data['type'])
                 # topic = "/marmitek/sensor/%s/%s" % (data['sensor'],
                 #                                     data['type'])
                 gate.push(data['house'], topic, data)
