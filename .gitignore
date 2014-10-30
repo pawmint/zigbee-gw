@@ -47,5 +47,4 @@ docs/_build/
 *.swp
 
 # config file
-resources/conf.ini
 resources/conf.json

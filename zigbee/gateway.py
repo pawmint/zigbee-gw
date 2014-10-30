@@ -2,7 +2,7 @@
 
 import logging
 
-from zigbee import zigbee_reader
+from zigbee import zigbee_IO
 
 from ubigate import Ubigate
 from ubigate import log, logger
@@ -23,7 +23,7 @@ def main():
                                        gateway['port'],
                                        gateway['name']))
 
-    for data in zigbee_reader.run(gate.timezone):
+    for data in zigbee_IO.run(gate.timezone):
         if data['type'] != 'error':
             try:
                 data['house'] = gate.find_house(data['sensor'])
