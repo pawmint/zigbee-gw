@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-import logging
-
 from zigbee import zigbee_IO
 
 from ubigate import Ubigate
-from ubigate import log, logger
+from ubigate import logger
 
 
 def main():
     gate = Ubigate('zigbee-gw',
                    default_file='resources/conf.json.default')
-    log.add_logger_file('data.log', logging.DEBUG)
-    logger.setLevel(logging.DEBUG)
 
     logger.info("Starting application")
     logger.info('Timezone: %s' % gate.timezone)
@@ -31,8 +27,6 @@ def main():
                 logger.warning("Unknown sensor: %s" % data['sensor'])
             else:
                 topic = "/zigbee/sensor/%s/%s" % (data['sensor'], data['type'])
-                # topic = "/marmitek/sensor/%s/%s" % (data['sensor'],
-                #                                     data['type'])
                 gate.push(data['house'], topic, data)
 
 

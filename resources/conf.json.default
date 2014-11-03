@@ -16,5 +16,10 @@
         "<Sensor2Code>"
       ]
     }
+  },
+  "logging": {
+    "file": "info",
+    "stdout": "debug"
   }
+
 }
