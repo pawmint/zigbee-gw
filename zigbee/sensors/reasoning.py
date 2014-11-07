@@ -9,7 +9,7 @@ def occupency(DR1):
     """
     global state
 
-    r1 = DR1.pop('R1')
+    r1 = DR1['R1']
     if r1 < THRESHOLD and all(value == 0 for value in DR1.values()):
         state = "off"
     elif r1 >= THRESHOLD and all(value == 0 for value in DR1.values()):

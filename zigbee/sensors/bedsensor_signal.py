@@ -70,7 +70,9 @@ def parse_dr1(signal_data, signal_addr, timezone):
         data = {'sensor': bed_id,
                 'type': 'event',
                 'value': occupency,
-                'signal_time': bed_time,
+                # tweak as bed_time is not well formatted and causes a bug
+                # 'signal_time': bed_time,
+                'signal_time': 0,
                 'date': date(timezone)}
         current_occupency = occupency
     else:
@@ -78,7 +80,9 @@ def parse_dr1(signal_data, signal_addr, timezone):
                 'type': 'signal',
                 'format': 'DR1',
                 'sample': dr1,
-                'signal_time': bed_time,
+                # tweak as bed_time is not well formatted and causes a bug
+                # 'signal_time': bed_time,
+                'signal_time': 0,
                 'date': date(timezone)}
     return data
 
