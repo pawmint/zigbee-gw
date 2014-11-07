@@ -1,0 +1,26 @@
+{
+  "gateways": [
+    {
+      "name": "<GW-Name>",
+      "server": "localhost",
+      "port": 1883
+    }
+  ],
+  "houses": [
+    {
+      "name": "1",
+      "username": "<USER>",
+      "password": "<PWD>",
+      "prefix": "<PREFIX>",
+      "sensors": [
+        "<Sensor1Code>",
+        "<Sensor2Code>"
+      ]
+    }
+  ],
+  "logging": {
+    "file": "info",
+    "stdout": "debug"
+  }
+
+}
