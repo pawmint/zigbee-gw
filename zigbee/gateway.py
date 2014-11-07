@@ -11,13 +11,7 @@ def main():
                    default_file='resources/conf.json.default')
 
     logger.info("Starting application")
-    logger.info('Timezone: %s' % gate.timezone)
-    for gateway in gate.config['gateways']:
-        logger.info('Server: %s\n'
-                    'Port: %s\n'
-                    'Gateway: %s\n' % (gateway['server'],
-                                       gateway['port'],
-                                       gateway['name']))
+    logger.debug('Timezone: %s' % gate.timezone)
 
     for data in zigbee_IO.run(gate.timezone):
         if data['type'] != 'error':

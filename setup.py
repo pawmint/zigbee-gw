@@ -17,12 +17,12 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'ubigate>=0.1.1',
+        'ubigate>=0.1.3',
         'pyserial>=2.7',
         'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.1.1#egg=UbiGate-0.1.1"
+        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.1.3#egg=UbiGate-0.1.3"
     ],
     entry_points={
         'console_scripts': ['zigbee-gw=zigbee.gateway:main'],
