@@ -54,7 +54,7 @@ def date(timezone):
     return date.isoformat()
 
 
-def parse_dr1(signal_data, signal_addr, timezone):
+def parse_dr1(signal_data, signal_addr, timezone, plugged_sensors):
     global current_occupency
 
     bed_time, raw_dr1 = signal_data[:]
@@ -65,7 +65,7 @@ def parse_dr1(signal_data, signal_addr, timezone):
                                                                dr1,
                                                                date(timezone)))
 
-    occupency = reasoning.occupency(dr1)
+    occupency = reasoning.occupency(dr1, plugged_sensors)
     if occupency is not current_occupency:
         data = {'sensor': bed_id,
                 'type': 'event',

@@ -77,11 +77,11 @@ def read_zigbee():
             pass
 
 
-def run(timezone):
+def run(timezone, plugged_sensors):
     for signal in read_zigbee():
         logger.debug('Message received: %s' % signal)
         try:
-            data = bedsensor_signal.matches(signal, timezone)
+            data = bedsensor_signal.matches(signal, timezone, plugged_sensors)
             if data is not None:
                 logger.debug('Data received: %s' % data)
                 yield data

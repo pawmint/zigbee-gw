@@ -2,17 +2,18 @@ THRESHOLD = 1000
 state = "off"
 
 
-def occupency(DR1):
+def occupency(DR1, plugged_sensors):
     """
-    Method to define if the bed is occupied or not in using one single sensor
-    TODO : read the file only one time.
+    Guess whether the bed is occupied
     """
     global state
 
-    r1 = DR1.pop('R1')
-    if r1 < THRESHOLD and all(value == 0 for value in DR1.values()):
-        state = "off"
-    elif r1 >= THRESHOLD and all(value == 0 for value in DR1.values()):
-        state = "on"
+    plugged_values = {sensor: DR1.pop(sensor) for sensor in plugged_sensors}
+
+    if all(value == 0 for value in DR1.values()):
+        if any(value >= THRESHOLD for value in plugged_values.values()):
+            state = "on"
+        else:
+            state = "off"
 
     return state
