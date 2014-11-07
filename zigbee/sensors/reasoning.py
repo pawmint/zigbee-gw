@@ -8,9 +8,11 @@ def occupency(DR1, plugged_sensors):
     """
     global state
 
-    plugged_values = {sensor: DR1.pop(sensor) for sensor in plugged_sensors}
+    unplugged = dict(DR1)
+    plugged_values = {sensor: unplugged.pop(sensor)
+                      for sensor in plugged_sensors}
 
-    if all(value == 0 for value in DR1.values()):
+    if all(value == 0 for value in unplugged.values()):
         if any(value >= THRESHOLD for value in plugged_values.values()):
             state = "on"
         else:
