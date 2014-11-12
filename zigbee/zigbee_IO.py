@@ -9,7 +9,6 @@ from ubigate import logger
 from zigbee.sensors import bedsensor_signal
 
 
-PORT = '/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0'
 BAUD_RATE = 9600
 AT_OK = ['OK\r']
 API_OK = ['ATAP 02\rOK\r']

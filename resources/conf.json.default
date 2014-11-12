@@ -22,5 +22,6 @@
     "file": "info",
     "stdout": "debug"
   },
-  "device": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A7026AAW-if00-port0"
+  "device": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A7026AAW-if00-port0" <OR>
+  "device": "/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0"
 }
