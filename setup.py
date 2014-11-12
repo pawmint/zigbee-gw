@@ -8,7 +8,7 @@ readme = open('README.md').read()
 
 setup(
     name='Zigbee-gw',
-    version='1.0',
+    version='1.0.1',
     description='A gateway to use the sensors that communicate through zigbee',
     long_description=readme,
     author='Clément Pallière',

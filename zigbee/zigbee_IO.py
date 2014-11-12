@@ -60,10 +60,10 @@ def initialize_APImode(ser_init):
     return False
 
 
-def read_zigbee():
+def read_zigbee(gate):
     # Open serial port
-    ser = serial.Serial(PORT, BAUD_RATE)
-    ser_init = serial.Serial(PORT, BAUD_RATE, timeout=0.1)
+    ser = serial.Serial(gate.config['device'], BAUD_RATE)
+    ser_init = serial.Serial(gate.config['device'], BAUD_RATE, timeout=0.1)
     # Create API object
     xbee = XBee(ser, escaped=True)
 
@@ -77,11 +77,11 @@ def read_zigbee():
             pass
 
 
-def run(timezone):
-    for signal in read_zigbee():
+def run(gate):
+    for signal in read_zigbee(gate):
         logger.debug('Message received: %s' % signal)
         try:
-            data = bedsensor_signal.matches(signal, timezone)
+            data = bedsensor_signal.matches(signal, gate.timezone)
             if data is not None:
                 logger.debug('Data received: %s' % data)
                 yield data

@@ -13,7 +13,7 @@ def main():
     logger.info("Starting application")
     logger.debug('Timezone: %s' % gate.timezone)
 
-    for data in zigbee_IO.run(gate.timezone):
+    for data in zigbee_IO.run(gate):
         if data['type'] != 'error':
             try:
                 data['house'] = gate.find_house(data['sensor'])

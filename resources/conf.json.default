@@ -21,6 +21,6 @@
   "logging": {
     "file": "info",
     "stdout": "debug"
-  }
-
+  },
+  "device": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A7026AAW-if00-port0"
 }
