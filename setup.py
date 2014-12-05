@@ -8,21 +8,21 @@ readme = open('README.md').read()
 
 setup(
     name='Zigbee-gw',
-    version='1.1',
+    version='1.2',
     description='A gateway to use the sensors that communicate through zigbee',
     long_description=readme,
-    author='Clément Pallière',
-    author_email='clement.palliere@hotmail.fr',
+    author='Clément Pallière, Romain Endelin',
+    author_email='romain.endelin@mines-telecom.fr',
     url='https://github.com/pawmint/zigbee-gw',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'ubigate>=0.1.4',
+        'ubigate>=0.2.0-alpha',
         'pyserial>=2.7',
         'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.1.4#egg=UbiGate-0.1.4"
+        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.2.0-alpha#egg=UbiGate-0.2.0-alpha"
     ],
     entry_points={
         'console_scripts': ['zigbee-gw=zigbee.gateway:main'],
