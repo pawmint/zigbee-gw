@@ -1,40 +1,53 @@
 Zigbee Gateway
 ==============
 
-This is the intern zigbee gateway program for ubigate. It each sensors present in the home and using zigbee communication protocol are using this gateway.
+Reads date from the sensors in the home using zigbee communication protocol, and transfers it to the server through MQTT, using the ubigate library.
 
-This program have to be set up on the beaglebone when sensors using zigbee are installed in a home.
+This program has to be set up on the Raspberry Pi Gateway when sensors using zigbee are installed in a home.
 
-##How To configure the BeagleBone:
-Clone the git repository for zigbe-gw in /home and switch to the branch bedproto.
+Currently, it can only be used for the bed sensor.
 
-Create a virtual environment.
+## Config
 
-Install zigbee-gw and its dependencies:
+Zigbee-gw reads config files from two distinct locations:
+
+* $HOME/zigbee-gw/conf.json
+* /etc/xdg/zigbee-gw/conf.json
+
+Here is a template `conf.json`:
+
 ```
-~# python setup.py install
+{
+  "gateways": [
+    {
+      "name": "XXX-zigbee",
+      "server": "normandie.ubismart.org",
+      "port": 1883,
+      "username": "normandie",
+      "password": "normandie"
+    }
+  ],
+  "houses": [
+    {
+      "id": "1",
+      "name": "My_house",
+      "prefix": "A",
+      "sensors": [
+        "BED-0",
+      ]
+    }
+  ],
+  "logging": {
+    "file": "info",
+    "stdout": "debug"
+  },
+  "device": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A7026AAW-if00-port0"
+  * OR *
+  "device": "/dev/serial/by-id/usb-FTDI_XBIB-U-DEV-if00-port0"
+}
 ```
 
-Adapt the config file:
-```
-~# cp resources/conf.ini.default resources/conf.ini
-~# nano ressources/conf.ini
-```
+## External files
 
-* Server and port correspond to the IP address and the listening port of your MQTT broker.
-* Gateway and house correspond of the BeagleBone name and the house ID.
-
-##How to run the program
-*(If the BeagleBone is up to date)*
-
-* Run the virtual environment
-
-  ```
-  ~# source <NameOfTheEnvironment>/bin/activate
-  ```
-* Run the MQTT broker.
-* In the folder zigbee-gw run the software with the command:
-
-  ```
-  ~# python zigbee-gw.py
-  ```
+* Event buffer: $HOME/.cache/zigbee-gw/<gateway-name>.json
+* Log: $HOME/.cache/zigbee-gw/log/zigbee-gw.log
