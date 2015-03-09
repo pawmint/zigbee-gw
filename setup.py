@@ -8,7 +8,7 @@ readme = open('README.md').read()
 
 setup(
     name='Zigbee-gw',
-    version='1.2',
+    version='1.2.1',
     description='A gateway to use the sensors that communicate through zigbee',
     long_description=readme,
     author='Clément Pallière, Romain Endelin',
@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'ubigate>=0.2.0-alpha',
+        'ubigate>=0.2.0',
         'pyserial>=2.7',
         'Xbee>=2.0.0'
     ],
