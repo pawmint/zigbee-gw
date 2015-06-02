@@ -22,7 +22,7 @@ setup(
         'Xbee>=2.0.0'
     ],
     dependency_links=[
-        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.2.0#egg=UbiGate-0.2.0"
+        "git+ssh://git@github.com/pawmint/ubiGATE.git@v0.2.1#egg=UbiGate-0.2.1"
     ],
     entry_points={
         'console_scripts': ['zigbee-gw=zigbee.gateway:main'],
